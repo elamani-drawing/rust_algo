@@ -40,7 +40,6 @@ fn bad_char_table(word: &'static str) -> HashMap<char, usize> {
 ///     let word = "are";
 ///    println!("{}", boyer_moore_horspool(word, worlds));
 /// }
-/// 
 /// ```
 /// 
 ///  # Returns 

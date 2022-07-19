@@ -1,8 +1,7 @@
-use rust_algo::searching::boyer_moore_horspool::boyer_moore_horspool;
+
+use rust_algo::math::distance_from_levenshtein::distance_from_levenshtein;
 
 fn main() {
-    let worlds = String::from("Hello John, how are you?");
-    let word = " ls";
-    println!("{}", boyer_moore_horspool(word, worlds));
+    println!("{}", distance_from_levenshtein("niche", "chien"));
 }
  

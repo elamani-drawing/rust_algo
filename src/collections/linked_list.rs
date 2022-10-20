@@ -2,6 +2,7 @@
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 use std::cmp::PartialEq;
+// use std::cell::Cell;
 
 type NodePointer<T> = Rc<RefCell<Node<T>>>;
 type NodePointerW<T> = Weak<RefCell<Node<T>>>; // used to prevent circular references between Rc pointers
@@ -220,6 +221,62 @@ impl<T: Copy + PartialEq> LinkedList<T>{
         }
     }
 
+    fn get_back(&mut self) -> Option<T>{
+        // let a = self.last.clone();
+        match &self.last {
+            Some(last) => {
+                Some(last.borrow_mut().value)
+            },
+            None => None
+        }
+    }
+
+    // fn get_back_mut(&mut self) -> Option<&mut T>{
+    //     // let a = self.last.clone();
+    //     match &mut self.last {
+    //         Some(last) => {
+    //             Some(&mut last.borrow_mut().value)
+    //         },
+    //         None => None
+    //     }
+    // }
+        
+    /// Provides a reference to the back element, or None if the list is empty.
+    /// 
+    /// # Examples
+    /// 
+    /// ```
+    /// use rust_algo::collections::LinkedList;
+    /// fn main() {
+    ///     let mut liste : LinkedList<i32> = LinkedList::new();
+    ///     assert_eq!(liste.back(), None);
+    ///     liste.push_back(5);
+    ///     assert_eq!(liste.back(), Some(5));
+    /// }
+    /// ```
+    ///
+    pub fn back(&mut self) -> Option<T>{
+        self.get_back()
+    }
+            
+    /// Provides a reference to the back element, or None if the list is empty.
+    /// 
+    /// # Examples
+    /// 
+    /// ```
+    /// use rust_algo::collections::LinkedList;
+    /// fn main() {
+    ///     let mut liste : LinkedList<i32> = LinkedList::new();
+    ///     assert_eq!(liste.back(), None);
+    ///     liste.push_back(5);
+    ///     assert_eq!(liste.back(), Some(5));
+    /// }
+    /// ```
+    ///
+    // pub fn back_mut(&mut self) -> Option<&mut T>{
+    //     self.get_back_mut()
+    // }
+    
     
     /// Add an element to the back of list
     ///
@@ -525,6 +582,20 @@ mod test {
 
         list.clear();
         assert_eq!(list.index_of(6), -1);
+    }
+
+    #[test]
+    fn get_back_front_ref_list() {
+        let mut list = create_linkedlist();
+        list.clear();
+        assert_eq!(list.back(), None);
+        list.push_back(5);
+        // let a = list.back_mut();
+        // match list.back_mut() {
+        //     None => {},
+        //     Some(x) => *x = 8,
+        // }
+        // assert_eq!(list.back(), Some(8));
     }
 
 }

@@ -1,9 +1,10 @@
 // use std::fmt::{self, Display, Formatter};
 use std::cell::RefCell;
-use std::rc::{Rc};
+use std::rc::{Rc, Weak};
 use std::cmp::PartialEq;
 
 type NodePointer<T> = Rc<RefCell<Node<T>>>;
+type NodePointerW<T> = Weak<RefCell<Node<T>>>; // used to prevent circular references between Rc pointers
 
 /// Structure of Node for LinkedList.
 ///
@@ -13,12 +14,11 @@ type NodePointer<T> = Rc<RefCell<Node<T>>>;
 /// * `next` - The next node 
 /// * `prev` - The previous node 
 ///
-// #[derive(PartialEq, Debug)]
 #[derive(Debug)]
 pub struct Node<T: Copy + PartialEq> {
     pub value: T,
-    pub next: Option<NodePointer<T>>,
-    pub prev: Option<NodePointer<T>>,
+    pub next: Option<NodePointer<T>>,  //rc
+    pub prev: Option<NodePointerW<T>>, //weak
 }
 
 impl<T: Copy + PartialEq> Node<T> {
@@ -100,7 +100,6 @@ pub struct LinkedList<T: Copy + PartialEq> {
     pub length: usize,
     head: Option<NodePointer<T>>,
     last: Option<NodePointer<T>>,
-    iterator : Option<NodePointer<T>>,
 }
 
 impl<T: Copy + PartialEq> LinkedList<T>{
@@ -133,7 +132,6 @@ impl<T: Copy + PartialEq> LinkedList<T>{
             head: None,
             last: None,
             length: 0, 
-            iterator : None,
         }
     }
 
@@ -141,8 +139,8 @@ impl<T: Copy + PartialEq> LinkedList<T>{
         let mut new_node = Node::new(value);
         match &mut self.last.take() {
             Some(old_last) => {
-                // new_node.prev = Some(Rc::downgrade(&old_last));
-                new_node.prev = Some(old_last.clone());
+                new_node.prev = Some(Rc::downgrade(&old_last));
+                // new_node.prev = Some(old_last.clone());
                 self.last = new_node.into();
                 old_last.borrow_mut().next = self.last.clone();
             }
@@ -161,8 +159,8 @@ impl<T: Copy + PartialEq> LinkedList<T>{
                 let previous = last.prev.take();
                 match previous {
                     Some(previous) => {
-                        // let previous = previous.upgrade();
-                        let previous = Some(previous);
+                        let previous = previous.upgrade();
+                        // let previous = Some(previous);
                         if let Some(previous) = previous {
                             previous.borrow_mut().next = None;
                             self.last = Some(previous);
@@ -187,8 +185,8 @@ impl<T: Copy + PartialEq> LinkedList<T>{
                 new_node.next = Some(old_head.clone());
                 self.head = new_node.into();
                 if let Some(head) = &self.head {
-                    // old_head.borrow_mut().prev = Some(Rc::downgrade(&head));
-                    old_head.borrow_mut().prev = Some(head.clone());
+                    old_head.borrow_mut().prev = Some(Rc::downgrade(&head));
+                    // old_head.borrow_mut().prev = Some(head.clone());
                 }
             },
             None => {
@@ -222,23 +220,6 @@ impl<T: Copy + PartialEq> LinkedList<T>{
         }
     }
 
-    // fn push_front(&mut self, value : T) {
-    //     let new_head: Link<T> = create_node_ref(value);
-    //     match self.head.take() {
-    //         Some(old_head) => {
-    //             new_head.borrow_mut().next = Some(old_head);
-    //             // self.head = Some(new_head);
-    //             self.head =Some(Rc::clone(&new_head));
-    //             self.iterator = Some(Rc::clone(&new_head));
-    //         }
-    //         None => {
-    //             self.head = Some(Rc::clone(&new_head));
-    //             self.iterator =  Some(Rc::clone(&new_head));
-    //             self.last = Some(new_head);
-    //         }
-    //     }
-    //     self.length +=1;
-    // }
     
     /// Add an element to the back of list
     ///

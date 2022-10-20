@@ -1,7 +1,10 @@
-
-use rust_algo::math::distance_from_levenshtein::distance_from_levenshtein;
+use rust_algo::collections::LinkedList;
 
 fn main() {
-    println!("{}", distance_from_levenshtein("niche", "chien"));
+    let mut list = LinkedList::new();
+    list.add(5);
+    list.add(6);
+    assert_eq!(list.index_of(6), 1);
+    dbg!(list);
 }
  

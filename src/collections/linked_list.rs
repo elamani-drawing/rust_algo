@@ -1,5 +1,5 @@
 // use std::fmt::{self, Display, Formatter};
-use std::cell::RefCell;
+use std::cell::{RefCell, Ref, RefMut};
 use std::rc::{Rc, Weak};
 use std::cmp::PartialEq;
 // use std::cell::Cell;
@@ -222,7 +222,6 @@ impl<T: Copy + PartialEq> LinkedList<T>{
     }
 
     fn get_back(&mut self) -> Option<T>{
-        // let a = self.last.clone();
         match &self.last {
             Some(last) => {
                 Some(last.borrow_mut().value)
@@ -230,18 +229,19 @@ impl<T: Copy + PartialEq> LinkedList<T>{
             None => None
         }
     }
+    fn get_back_ref(&mut self) -> Option<Ref<T>>{
+        self.last.as_ref().map(|node| {
+            Ref::map(node.borrow(), |node| &node.value)
+        })
+    }
 
-    // fn get_back_mut(&mut self) -> Option<&mut T>{
-    //     // let a = self.last.clone();
-    //     match &mut self.last {
-    //         Some(last) => {
-    //             Some(&mut last.borrow_mut().value)
-    //         },
-    //         None => None
-    //     }
-    // }
+    fn get_back_mut(&mut self) -> Option<RefMut<T>>{
+        self.last.as_ref().map(|node| {
+            RefMut::map(node.borrow_mut(), |node| &mut node.value)
+        })
+    }
         
-    /// Provides a reference to the back element, or None if the list is empty.
+    /// Provides value of back element, or None if the list is empty.
     /// 
     /// # Examples
     /// 
@@ -269,13 +269,35 @@ impl<T: Copy + PartialEq> LinkedList<T>{
     ///     let mut liste : LinkedList<i32> = LinkedList::new();
     ///     assert_eq!(liste.back(), None);
     ///     liste.push_back(5);
-    ///     assert_eq!(liste.back(), Some(5));
+    ///     assert_eq!(&*liste.back_ref().unwrap(), &5);
     /// }
     /// ```
     ///
-    // pub fn back_mut(&mut self) -> Option<&mut T>{
-    //     self.get_back_mut()
-    // }
+    pub fn back_ref(&mut self) -> Option<Ref<T>>{
+        self.get_back_ref()
+    }
+            
+    /// Provides a mutable reference to the back element, or None if the list is empty.
+    /// 
+    /// # Examples
+    /// 
+    /// ```
+    /// use rust_algo::collections::LinkedList;
+    /// fn main() {
+    ///     let mut liste : LinkedList<i32> = LinkedList::new();
+    ///     liste.push_back(5);
+    ///     assert_eq!(liste.back(), Some(5));
+    ///     match liste.back_mut() {
+    ///         None => {},
+    ///         Some(mut x) => *x = 8,
+    ///     }
+    ///     assert_eq!(liste.back(), Some(8));
+    /// }
+    /// ```
+    ///
+    pub fn back_mut(&mut self) -> Option<RefMut<T>>{
+        self.get_back_mut()
+    }
     
     
     /// Add an element to the back of list
@@ -589,13 +611,15 @@ mod test {
         let mut list = create_linkedlist();
         list.clear();
         assert_eq!(list.back(), None);
+        assert_eq!(list.back_ref().is_none(), true);
         list.push_back(5);
-        // let a = list.back_mut();
-        // match list.back_mut() {
-        //     None => {},
-        //     Some(x) => *x = 8,
-        // }
-        // assert_eq!(list.back(), Some(8));
+        assert_eq!(list.back(), Some(5));
+        assert_eq!(&*list.back_ref().unwrap(), &5);
+        match list.back_mut() {
+            None => {},
+            Some(mut x) => *x = 8,
+        }
+        assert_eq!(list.back(), Some(8));
     }
 
 }

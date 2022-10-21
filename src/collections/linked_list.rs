@@ -1,7 +1,7 @@
 // use std::fmt::{self, Display, Formatter};
-use std::cell::{RefCell, Ref, RefMut};
-use std::rc::{Rc, Weak};
+use std::cell::{Ref, RefCell, RefMut};
 use std::cmp::PartialEq;
+use std::rc::{Rc, Weak};
 // use std::cell::Cell;
 
 type NodePointer<T> = Rc<RefCell<Node<T>>>;
@@ -12,8 +12,8 @@ type NodePointerW<T> = Weak<RefCell<Node<T>>>; // used to prevent circular refer
 /// # Attributes
 ///
 /// * `value` - Value of node
-/// * `next` - The next node 
-/// * `prev` - The previous node 
+/// * `next` - The next node
+/// * `prev` - The previous node
 ///
 #[derive(Debug)]
 pub struct Node<T: Copy + PartialEq> {
@@ -30,7 +30,7 @@ impl<T: Copy + PartialEq> Node<T> {
     /// * `value` - Value of node
     ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use rust_algo::collections::Node;
     /// fn main() {
@@ -38,13 +38,13 @@ impl<T: Copy + PartialEq> Node<T> {
     ///     //println("{node}");
     /// }
     /// ```
-    /// 
-    /// # Returns 
-    /// 
+    ///
+    /// # Returns
+    ///
     /// * `Node<T>` - The node that was created
-    /// 
+    ///
     pub fn new(_value: T) -> Self {
-        Self { 
+        Self {
             value: _value,
             next: None,
             prev: None,
@@ -57,14 +57,13 @@ fn create_ref_node<T: Copy + PartialEq>(_value: T) -> NodePointer<T> {
     Rc::new(RefCell::new(Node::new(_value)))
 }
 
-
 // egality between Node and Node(PartialEq)
 impl<T: Copy + PartialEq> PartialEq<Node<T>> for Node<T> {
     fn eq(&self, other: &Node<T>) -> bool {
         self.value == other.value
     }
 
-    fn ne(&self, other: &Node<T>) -> bool { 
+    fn ne(&self, other: &Node<T>) -> bool {
         self.value != other.value
     }
 }
@@ -87,7 +86,6 @@ impl<T: Copy + PartialEq> From<Node<T>> for Option<NodePointer<T>> {
 //     }
 // }
 
-
 /// LinkedList structure.
 ///
 /// # Attributes
@@ -95,7 +93,7 @@ impl<T: Copy + PartialEq> From<Node<T>> for Option<NodePointer<T>> {
 /// * `length` - Size of list
 /// * `head` - The first Node of list
 /// * `last` - The last Node of list
-/// 
+///
 #[derive(Debug)]
 pub struct LinkedList<T: Copy + PartialEq> {
     pub length: usize,
@@ -103,8 +101,7 @@ pub struct LinkedList<T: Copy + PartialEq> {
     last: Option<NodePointer<T>>,
 }
 
-impl<T: Copy + PartialEq> LinkedList<T>{
-    
+impl<T: Copy + PartialEq> LinkedList<T> {
     /// Create a LinkedList.
     ///
     /// # Attributes
@@ -114,7 +111,7 @@ impl<T: Copy + PartialEq> LinkedList<T>{
     /// * `last` - The last Node of list
     ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use rust_algo::collections::LinkedList;
     /// fn main() {
@@ -123,20 +120,20 @@ impl<T: Copy + PartialEq> LinkedList<T>{
     ///     //println!("{liste}");
     /// }
     /// ```
-    /// 
-    /// # Returns 
+    ///
+    /// # Returns
     ///  
     /// * `LinkedList<T>` - The LinkedList that was created
     ///
-    pub fn new()  -> Self {
-        Self{
+    pub fn new() -> Self {
+        Self {
             head: None,
             last: None,
-            length: 0, 
+            length: 0,
         }
     }
 
-    fn push_back_node(&mut self, value : T) {
+    fn push_back_node(&mut self, value: T) {
         let mut new_node = Node::new(value);
         match &mut self.last.take() {
             Some(old_last) => {
@@ -147,12 +144,12 @@ impl<T: Copy + PartialEq> LinkedList<T>{
             }
             None => {
                 self.head = new_node.into(); //into : A value-to-value conversion that consumes the input value. The opposite of From.
-                self.last =  self.head.clone(); //clone a node
+                self.last = self.head.clone(); //clone a node
             }
         }
-        self.length +=1;
+        self.length += 1;
     }
-    
+
     fn pop_back_node(&mut self) -> Option<T> {
         match &mut self.last.take() {
             Some(last) => {
@@ -172,14 +169,14 @@ impl<T: Copy + PartialEq> LinkedList<T>{
                         self.head.take();
                     }
                 };
-                self.length -=1;
+                self.length -= 1;
                 Some(last.value)
-            },
-            None => None
+            }
+            None => None,
         }
     }
 
-    fn push_front_node(&mut self, value : T) {
+    fn push_front_node(&mut self, value: T) {
         let mut new_node = Node::new(value);
         match &mut self.head.take() {
             Some(old_head) => {
@@ -189,13 +186,13 @@ impl<T: Copy + PartialEq> LinkedList<T>{
                     old_head.borrow_mut().prev = Some(Rc::downgrade(&head));
                     // old_head.borrow_mut().prev = Some(head.clone());
                 }
-            },
+            }
             None => {
                 self.head = new_node.into();
                 self.last = self.head.clone();
             }
         }
-        self.length+=1;
+        self.length += 1;
     }
 
     fn pop_front_node(&mut self) -> Option<T> {
@@ -207,44 +204,41 @@ impl<T: Copy + PartialEq> LinkedList<T>{
                     Some(next) => {
                         //configure new head
                         next.borrow_mut().prev = None;
-                        self.head = Some(next); 
-                    }, 
-                    None =>{
+                        self.head = Some(next);
+                    }
+                    None => {
                         self.last.take();
                     }
-                
                 };
-                self.length -=1;
+                self.length -= 1;
                 Some(head.value)
-            },
-            None => None
+            }
+            None => None,
         }
     }
 
-    fn get_back(&mut self) -> Option<T>{
+    fn get_back(&mut self) -> Option<T> {
         match &self.last {
-            Some(last) => {
-                Some(last.borrow_mut().value)
-            },
-            None => None
+            Some(last) => Some(last.borrow_mut().value),
+            None => None,
         }
     }
-    fn get_back_ref(&mut self) -> Option<Ref<T>>{
-        self.last.as_ref().map(|node| {
-            Ref::map(node.borrow(), |node| &node.value)
-        })
+    fn get_back_ref(&mut self) -> Option<Ref<T>> {
+        self.last
+            .as_ref()
+            .map(|node| Ref::map(node.borrow(), |node| &node.value))
     }
 
-    fn get_back_mut(&mut self) -> Option<RefMut<T>>{
-        self.last.as_ref().map(|node| {
-            RefMut::map(node.borrow_mut(), |node| &mut node.value)
-        })
+    fn get_back_mut(&mut self) -> Option<RefMut<T>> {
+        self.last
+            .as_ref()
+            .map(|node| RefMut::map(node.borrow_mut(), |node| &mut node.value))
     }
-        
+
     /// Provides value of back element, or None if the list is empty.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use rust_algo::collections::LinkedList;
     /// fn main() {
@@ -255,14 +249,14 @@ impl<T: Copy + PartialEq> LinkedList<T>{
     /// }
     /// ```
     ///
-    pub fn back(&mut self) -> Option<T>{
+    pub fn back(&mut self) -> Option<T> {
         self.get_back()
     }
-            
+
     /// Provides a reference to the back element, or None if the list is empty.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use rust_algo::collections::LinkedList;
     /// fn main() {
@@ -273,14 +267,14 @@ impl<T: Copy + PartialEq> LinkedList<T>{
     /// }
     /// ```
     ///
-    pub fn back_ref(&mut self) -> Option<Ref<T>>{
+    pub fn back_ref(&mut self) -> Option<Ref<T>> {
         self.get_back_ref()
     }
-            
+
     /// Provides a mutable reference to the back element, or None if the list is empty.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use rust_algo::collections::LinkedList;
     /// fn main() {
@@ -295,11 +289,10 @@ impl<T: Copy + PartialEq> LinkedList<T>{
     /// }
     /// ```
     ///
-    pub fn back_mut(&mut self) -> Option<RefMut<T>>{
+    pub fn back_mut(&mut self) -> Option<RefMut<T>> {
         self.get_back_mut()
     }
-    
-    
+
     /// Add an element to the back of list
     ///
     /// # Arguments
@@ -307,7 +300,7 @@ impl<T: Copy + PartialEq> LinkedList<T>{
     /// * `value` - The value to add in the list
     ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use rust_algo::collections::LinkedList;
     /// fn main() {
@@ -316,10 +309,10 @@ impl<T: Copy + PartialEq> LinkedList<T>{
     /// }
     /// ```
     ///
-    pub fn push_back(&mut self, value : T) {
+    pub fn push_back(&mut self, value: T) {
         self.push_back_node(value)
     }
-    
+
     /// Add an element to the back of list
     ///
     /// # Arguments
@@ -327,7 +320,7 @@ impl<T: Copy + PartialEq> LinkedList<T>{
     /// * `value` - The value to add in the list
     ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use rust_algo::collections::LinkedList;
     /// fn main() {
@@ -336,14 +329,14 @@ impl<T: Copy + PartialEq> LinkedList<T>{
     /// }
     /// ```
     ///
-    pub fn add(&mut self, value : T) {
+    pub fn add(&mut self, value: T) {
         self.push_back_node(value)
     }
-    
+
     /// Removes the last element from a list and returns it, or None if it is empty.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use rust_algo::collections::LinkedList;
     /// fn main() {
@@ -357,7 +350,7 @@ impl<T: Copy + PartialEq> LinkedList<T>{
     pub fn pop_back(&mut self) -> Option<T> {
         self.pop_back_node()
     }
-  
+
     /// Add an element to the front of list
     ///
     /// # Arguments
@@ -365,7 +358,7 @@ impl<T: Copy + PartialEq> LinkedList<T>{
     /// * `value` - The value to add in the list
     ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use rust_algo::collections::LinkedList;
     /// fn main() {
@@ -375,14 +368,14 @@ impl<T: Copy + PartialEq> LinkedList<T>{
     /// }
     /// ```
     ///
-    pub fn push_front(&mut self, value : T) {
+    pub fn push_front(&mut self, value: T) {
         self.push_front_node(value)
     }
-    
+
     /// Removes the first element from a list and returns it, or None if it is empty.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use rust_algo::collections::LinkedList;
     /// fn main() {
@@ -398,12 +391,12 @@ impl<T: Copy + PartialEq> LinkedList<T>{
     }
 
     /// Removes all elements from the LinkedList.
-    /// 
+    ///
     /// Examples
-    /// 
+    ///
     /// ```
     /// use rust_algo::collections::LinkedList;
-    /// 
+    ///
     /// fn main() {
     ///     let mut liste : LinkedList<i32> = LinkedList::new();
     ///     liste.push_back(5);
@@ -412,7 +405,7 @@ impl<T: Copy + PartialEq> LinkedList<T>{
     ///     assert_eq!(liste.pop_front(), None);
     /// }
     /// ```
-    /// 
+    ///
     pub fn clear(&mut self) {
         *self = Self::new();
     }
@@ -420,7 +413,7 @@ impl<T: Copy + PartialEq> LinkedList<T>{
     /// Returns true if self is empty
     ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use rust_algo::collections::LinkedList;
     /// fn main() {
@@ -430,16 +423,15 @@ impl<T: Copy + PartialEq> LinkedList<T>{
     ///     assert_eq!(liste.is_empty(), false);
     /// }
     /// ```
-    /// 
+    ///
     pub fn is_empty(&self) -> bool {
-        self.length==0
+        self.length == 0
     }
 
-    
     /// Returns len of list
     ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use rust_algo::collections::LinkedList;
     /// fn main() {
@@ -448,7 +440,7 @@ impl<T: Copy + PartialEq> LinkedList<T>{
     ///     assert_eq!(liste.len(), 1);
     /// }
     /// ```
-    /// 
+    ///
     pub fn len(&self) -> usize {
         self.length
     }
@@ -456,7 +448,7 @@ impl<T: Copy + PartialEq> LinkedList<T>{
     /// Returns size of list
     ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use rust_algo::collections::LinkedList;
     /// fn main() {
@@ -465,19 +457,19 @@ impl<T: Copy + PartialEq> LinkedList<T>{
     ///     assert_eq!(liste.size(), 1);
     /// }
     /// ```
-    /// 
+    ///
     pub fn size(&self) -> usize {
         self.length
     }
 
     /// Returns index of _value or -1 if not in Linkedlist
-    /// 
+    ///
     /// # Arguments
     ///
     /// * `_value` - The value whose index we want to know
     ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use rust_algo::collections::LinkedList;
     /// fn main() {
@@ -489,34 +481,53 @@ impl<T: Copy + PartialEq> LinkedList<T>{
     ///     assert_eq!(liste.index_of(83), -1);
     /// }
     /// ```
-    /// 
-    pub fn index_of(&self, _value : T) -> isize {
+    ///
+    pub fn index_of(&self, _value: T) -> isize {
         let _value = create_ref_node(_value);
         let mut current = self.head.clone();
-        let mut index : isize = 0;
-        let mut find :bool = false;
+        let mut index: isize = 0;
+        let mut find: bool = false;
         while current.is_some() && find == false {
             //check next element
-            if let Some(ref value) =  current {
+            if let Some(ref value) = current {
                 let value_current = value.clone();
-                if _value == value_current  {
+                if _value == value_current {
                     find = true;
-                }else{
-                    index+=1;
+                } else {
+                    index += 1;
                     current = Rc::clone(&value_current).borrow_mut().next.clone();
                 }
             }
         }
-        
-        if self.is_empty() || find ==false{
-        return -1;
+
+        if self.is_empty() || find == false {
+            return -1;
         }
         index
     }
-
 }
 
+pub struct IntoIter<T: Copy + PartialEq>(LinkedList<T>);
 
+impl<T: Copy + PartialEq> LinkedList<T> {
+    pub fn into_iter(self) -> IntoIter<T> {
+        IntoIter(self)
+    }
+}
+
+//frst direction
+impl<T: Copy + PartialEq> Iterator for IntoIter<T> {
+    type Item = T;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.pop_front()
+    }
+}
+//second direction
+impl<T: Copy + PartialEq> DoubleEndedIterator for IntoIter<T> {
+    fn next_back(&mut self) -> Option<T> {
+        self.0.pop_back()
+    }
+}
 
 impl<T: Copy + PartialEq> Drop for LinkedList<T> {
     fn drop(&mut self) {
@@ -529,8 +540,7 @@ mod test {
     use super::*;
 
     fn create_linkedlist() -> LinkedList<i32> {
-        
-        let mut list : LinkedList<i32> = LinkedList::new();
+        let mut list: LinkedList<i32> = LinkedList::new();
         list.push_front(1);
         list.push_front(2);
         list.push_front(3);
@@ -542,7 +552,7 @@ mod test {
     #[test]
     fn push_and_pop_back_list() {
         // let mut list = List::new();
-        let mut list : LinkedList<i32> = LinkedList::new();
+        let mut list: LinkedList<i32> = LinkedList::new();
         assert_eq!(list.is_empty(), true);
 
         list.push_back(1);
@@ -562,7 +572,7 @@ mod test {
 
     #[test]
     fn push_and_pop_front_list() {
-        let mut list : LinkedList<i32> = LinkedList::new();
+        let mut list: LinkedList<i32> = LinkedList::new();
         assert_eq!(list.is_empty(), true);
 
         list.push_front(1);
@@ -581,7 +591,7 @@ mod test {
     }
     #[test]
     fn clear_and_drop_list() {
-        let mut list : LinkedList<i32> = LinkedList::new();
+        let mut list: LinkedList<i32> = LinkedList::new();
 
         list.push_front(1);
         list.push_front(2);
@@ -616,11 +626,22 @@ mod test {
         assert_eq!(list.back(), Some(5));
         assert_eq!(&*list.back_ref().unwrap(), &5);
         match list.back_mut() {
-            None => {},
+            None => {}
             Some(mut x) => *x = 8,
         }
         assert_eq!(list.back(), Some(8));
     }
 
-}
+    #[test]
+    fn into_iter() {
+        let list = create_linkedlist();
 
+        let mut iter = list.into_iter();
+        assert_eq!(iter.next(), Some(4));
+        assert_eq!(iter.next_back(), Some(1));
+        assert_eq!(iter.next(), Some(3));
+        assert_eq!(iter.next_back(), Some(2));
+        assert_eq!(iter.next(), None);
+        assert_eq!(iter.next_back(), None);
+    }
+}
